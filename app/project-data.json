@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Contributor Onboarding",
+      "owner": "Maya Chen",
+      "status": "Active",
+      "recentActivity": "Published the updated getting-started guide yesterday.",
+      "priority": "High",
+      "summary": "Make it easier for new contributors to find their first issue and get a development environment running."
+    },
+    {
+      "name": "Community Insights",
+      "owner": "Jordan Patel",
+      "status": "In progress",
+      "recentActivity": "Finished stakeholder interviews and shared the first findings on Monday.",
+      "priority": "Medium",
+      "summary": "Turn community feedback into a concise set of product and documentation improvements."
+    },
+    {
+      "name": "Accessibility Refresh",
+      "owner": "Sam Rivera",
+      "status": "At risk",
+      "recentActivity": "Keyboard-navigation review is waiting on a test environment.",
+      "priority": "Critical",
+      "summary": "Address high-impact accessibility gaps across the team's most-used contributor workflows."
+    },
+    {
+      "name": "Release Readiness",
+      "owner": "Avery Thompson",
+      "status": "Planned",
+      "recentActivity": "Drafted the release checklist and identified cross-team dependencies.",
+      "priority": "Low",
+      "summary": "Coordinate documentation, quality checks, and handoffs ahead of the next community release."
+    }
+  ]
+}

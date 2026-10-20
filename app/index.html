@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A quick overview of Mona's team projects, owners, status, and priorities.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <div class="dashboard-heading">
+          <p class="dashboard-eyebrow">Team overview</p>
+          <h1>Project Pulse</h1>
+          <p class="dashboard-description">A clear view of what the team is building, who is moving it forward, and what needs attention.</p>
+        </div>
+        <p class="dashboard-summary" id="project-count" aria-live="polite">Loading projects…</p>
+      </header>
+
+      <section aria-labelledby="projects-heading">
+        <div class="dashboard-section-heading">
+          <h2 id="projects-heading">Projects</h2>
+          <p>Current status, priority, and latest activity</p>
+        </div>
+        <div id="project-content" aria-live="polite" aria-busy="true">
+          <p class="dashboard-state" role="status">Loading project data…</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const content = document.querySelector("#project-content");
+      const projectCount = document.querySelector("#project-count");
+
+      function showMessage(className, title, message, role) {
+        const panel = document.createElement("div");
+        panel.className = className;
+        if (role) panel.setAttribute("role", role);
+
+        const heading = document.createElement("h2");
+        heading.textContent = title;
+        const description = document.createElement("p");
+        description.textContent = message;
+        panel.append(heading, description);
+        content.replaceChildren(panel);
+      }
+
+      function displayValue(value, fallback) {
+        return typeof value === "string" && value.trim() ? value.trim() : fallback;
+      }
+
+      function badgeValue(value) {
+        return displayValue(value, "Unspecified").toLowerCase().replace(/\s+/g, "-");
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const header = document.createElement("header");
+        header.className = "project-card-header";
+        const title = document.createElement("h3");
+        title.className = "project-card-title";
+        title.textContent = displayValue(project.name, "Untitled project");
+        const owner = document.createElement("p");
+        owner.className = "project-card-owner";
+        const ownerLabel = document.createElement("span");
+        ownerLabel.className = "project-card-owner-label";
+        ownerLabel.textContent = "Owner";
+        const ownerName = document.createElement("span");
+        ownerName.textContent = displayValue(project.owner, "Unassigned");
+        owner.append(ownerLabel, ownerName);
+        header.append(title, owner);
+
+        const summary = document.createElement("p");
+        summary.className = "project-card-summary";
+        summary.textContent = displayValue(project.summary, "No summary provided.");
+
+        const metadata = document.createElement("div");
+        metadata.className = "project-card-meta";
+        const status = document.createElement("span");
+        status.className = "status-badge";
+        status.dataset.status = badgeValue(project.status);
+        status.textContent = `Status: ${displayValue(project.status, "Unspecified")}`;
+        const priority = document.createElement("span");
+        priority.className = "priority-badge";
+        priority.dataset.priority = badgeValue(project.priority);
+        priority.textContent = `Priority: ${displayValue(project.priority, "Unspecified")}`;
+        metadata.append(status, priority);
+
+        const activity = document.createElement("div");
+        activity.className = "project-card-activity";
+        const activityLabel = document.createElement("span");
+        activityLabel.className = "project-card-activity-label";
+        activityLabel.textContent = "Recent activity";
+        const activityText = document.createElement("p");
+        activityText.className = "project-card-activity-text";
+        activityText.textContent = displayValue(project.recentActivity, "No recent activity reported.");
+        activity.append(activityLabel, activityText);
+
+        card.append(header, summary, metadata, activity);
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed with status ${response.status}.`);
+          }
+
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a top-level projects array.");
+          }
+
+          content.setAttribute("aria-busy", "false");
+          if (data.projects.length === 0) {
+            projectCount.textContent = "0 projects";
+            showMessage("dashboard-empty", "No projects yet", "Project updates will appear here when they're added.");
+            return;
+          }
+
+          const grid = document.createElement("div");
+          grid.className = "project-grid";
+          grid.setAttribute("aria-label", "Project cards");
+          grid.append(...data.projects.map(createProjectCard));
+          content.replaceChildren(grid);
+          projectCount.replaceChildren();
+          const count = document.createElement("strong");
+          count.textContent = String(data.projects.length);
+          projectCount.append(count, ` ${data.projects.length === 1 ? "project" : "projects"}`);
+        } catch (error) {
+          content.setAttribute("aria-busy", "false");
+          projectCount.textContent = "Projects unavailable";
+          showMessage(
+            "dashboard-error",
+            "We couldn't load the projects",
+            `Check that project-data.json is valid and served with this page, then refresh. ${error instanceof Error ? error.message : ""}`,
+            "alert"
+          );
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
